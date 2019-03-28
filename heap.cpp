@@ -8,14 +8,13 @@ Left child ALWAYS less Right child
 03.2019 P.Sh.
 */
 #include <iostream>
-#include <random>
 #include <stdlib.h>
 
 
 class heap_node
 {
 private:
-    char key[];
+    char *key;
     int *arr;
     int amount;
 
@@ -25,14 +24,14 @@ private:
 public:
     heap_node(char *key_str, int *arr_point, int amount_elem)
     {
-        *key = *key_str;
+        key = key_str;
         arr = arr_point;
         amount = amount_elem;
     }
 
-    heap_node(char key_str[])
+    heap_node(char* key_str)
     {
-        *key = *key_str;
+        key = key_str;
         arr = NULL;
         amount = 0;        
     }
@@ -106,6 +105,15 @@ private:
         return;
     }
 
+    bool compare(char* a, char* b)
+    {
+        if (*a < *b)
+        {return true;}
+        else
+        {return false;}
+        
+    }
+
 public:
     HEAP()
     {
@@ -132,7 +140,7 @@ public:
         }
         while (1)
         {
-            if ( (*tmp).get_key() > (*Pn).get_key())
+            if( compare( (*tmp).get_key() , (*Pn).get_key()))
             {
                 if ((*tmp).get_l_child() == NULL)
                 {
@@ -181,7 +189,8 @@ int* random_arr(int &amount)
 
 char* random_char(void)
 {
-    static char temp[5];
+    static char *temp;
+    temp = new char[5];
     for(int i = 0; i < 5; i++)
     {
         temp[i] = rand() % 128;
