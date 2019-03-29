@@ -1,15 +1,14 @@
 /*
 This program realise HEAP 
-max-heap structure:
+heap structure:
     KEY: string[5]
     DATA: array of int
 
-Left child ALWAYS less Right child
+Left child < Parent < Right child
 03.2019 P.Sh.
 */
 #include <iostream>
 #include <stdlib.h>
-
 
 class heap_node
 {
@@ -38,7 +37,13 @@ public:
 
     ~heap_node()
     {
-        delete[] arr;
+        // delete data in node
+		if (arr != NULL)
+		{
+			delete[] arr;
+			arr = NULL;
+		}
+		delete[] key;
     }
 
      void set_r_child(heap_node* child)
@@ -80,38 +85,41 @@ class HEAP
 private:
     heap_node *root = NULL;
 
-    void remove(heap_node *pointer)
-    {
-        if (pointer != NULL)
-        {
-            if ((*pointer).get_l_child() != NULL)
-            {
-                remove((*pointer).get_l_child());
-            }
-            else
-            {
-                if ((*pointer).get_r_child() != NULL)
-                {
-                    remove((*pointer).get_r_child());
-                }
-                else
-                {
-                    delete pointer;
-                }
-                
-            }
-            
-        }
-        return;
-    }
-
+	void remove_under(heap_node *pointer)
+	{
+		if (pointer != NULL)
+		{
+			while (1)
+			{
+				if ((*pointer).get_l_child() != NULL)
+				{
+					remove_under((*pointer).get_l_child());
+					(*pointer).set_l_child(0);
+				}
+				else
+				{
+					if ((*pointer).get_r_child() != NULL)
+					{
+						remove_under((*pointer).get_r_child());
+						(*pointer).set_r_child(NULL);
+					}
+					else
+					{
+						delete pointer;
+						return;
+					}
+				}
+			}
+		}
+		return;
+	}
+    
     bool compare(char* a, char* b)
     {
         if (*a < *b)
         {return true;}
         else
         {return false;}
-        
     }
 
 public:
@@ -123,7 +131,7 @@ public:
     ~HEAP()
     {
         //delete all heap_node
-        remove(root);
+        remove_under(root);
         delete root;
     }
 
@@ -138,7 +146,7 @@ public:
             root = Pn;
             return;
         }
-        while (1)
+       while (1)        // find place for current heap_node
         {
             if( compare( (*tmp).get_key() , (*Pn).get_key()))
             {
@@ -164,15 +172,45 @@ public:
                     tmp = (*tmp).get_r_child();
                 }
             }
-            
         }
-    }
+    } 
 
     void clear(void)
     {
-        remove(root);
+        remove_under(root);
         root = NULL;
     };
+
+    int* find(char *key, int &amount)
+    {
+        heap_node *tmp = root;
+        while(1)
+        {
+            if (tmp == NULL)
+            {
+                amount = 0;
+                return NULL;
+            }
+            else
+            {
+                if (  (*tmp).get_key() == key )
+                {
+                    return (*tmp).get_array(amount);
+                }
+                else
+                {
+                    if( compare( (*tmp).get_key() , key))
+                    {
+                        tmp = (*tmp).get_l_child();
+                    }
+                    else
+                    {
+                        tmp = (*tmp).get_r_child();
+                    }
+                }
+            }
+        }
+    }
 };
 
 int* random_arr(int &amount)
@@ -202,9 +240,21 @@ int main()
 {
     HEAP heap;
     int amount = 0;
-    for(int count = 0; count < 30; count++)
+    int *tmp_arr;
+    char *tmp_ch;
+    
+    for(int count = 0; count < 2; count++)
     {
-        heap.add(random_char(),random_arr(amount), amount);
+        tmp_ch = random_char();
+        tmp_arr = random_arr(amount);
+        heap.add(tmp_ch,tmp_arr, amount);
     };
+
+    tmp_arr = heap.find(tmp_ch,amount);
+    for (int i =0; i < amount;i++)
+    {
+        std::cout << tmp_arr[i] << std::endl;
+    }
     heap.clear();
+    return 0;
 }
